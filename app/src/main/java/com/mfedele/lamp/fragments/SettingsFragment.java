@@ -1,5 +1,6 @@
 package com.mfedele.lamp.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
@@ -16,5 +17,13 @@ public class SettingsFragment extends PreferenceFragment {
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity.getActionBar() != null)
+            activity.getActionBar().hide();
     }
 }

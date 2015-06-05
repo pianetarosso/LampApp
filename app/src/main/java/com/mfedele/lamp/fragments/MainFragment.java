@@ -46,6 +46,7 @@ public class MainFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
@@ -83,6 +84,9 @@ public class MainFragment extends Fragment implements
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (getActivity().getActionBar() != null)
+            getActivity().getActionBar().show();
 
         colorPickerTransitionTime = getActivity().getResources().getInteger(R.integer.main_colorpicker_transition);
 
