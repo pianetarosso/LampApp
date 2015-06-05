@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Values for frequency seekBar in settings fragment. Values in millisecond -->
+    <integer name="min_interval_ms">20</integer>
+    <integer name="max_interval_ms">1000</integer>
+
+    <!-- Values for brightness seekBars. Values in percentage -->
+    <integer name="max_brightness">100</integer>
+    <integer name="min_brightness">0</integer>
+    <integer name="def_brightness">50</integer>
+
+    <!-- SharedPreferences key for app's settings-->
+    <string name="sp_app">key_app</string>
+    <string name="sp_save_lamp_values">key_save_lamp_values</string>
+
+    <!-- SharedPreferences key for network's settings-->
+    <string name="sp_network">key_network</string>
+    <string name="sp_enable_continuous_update">key_enable_continuous_update</string>
+    <string name="sp_update_frequency_ms">key_update_frequency_ms</string>
+    <string name="sp_url">key_url</string>
+    <string name="url_default_value">http://</string>
+
+    <!-- SharedPreferences key form lamp's values-->
+    <string name="sp_brightness">key_brightness</string>
+    <string name="sp_enable_color">key_enable_color</string>
+    <string name="sp_color">key_color</string>
+    <string name="sp_color_brightness">key_color_brightness</string>
+
+    <!-- Transition time in ms when showing the color picker -->
+    <integer name="main_colorpicker_transition">1000</integer>
+
+    <!-- Default initial color (orange :P )-->
+    <color name="initial_color">#FFFFBB33</color>
+
+    <!-- Default value for the color's switch -->
+    <bool name="default_switch_value">false</bool>
+
+    <!-- Default save lamp status value -->
+    <bool name="default_save_lamp_status_value">false</bool>
+
+</resources>

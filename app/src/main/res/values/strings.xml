@@ -1,5 +1,23 @@
 <resources>
     <string name="app_name">Lamp</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string name="settings_app_section">App</string>
+    <string name="settings_save_lamp_status_title">Save lamp status</string>
+    <string name="settings_save_lamp_status_description">Use the SharedPreferences to provide a persistence for the lamp values</string>
+
+    <string name="settings_network_section">Network</string>
+    <string name="settings_enable_continuous_update_title">Enable continuous updates</string>
+    <string name="settings_enable_continuous_update_description">Send updates of the lamp\'s status using the passed interval</string>
+    <string name="settings_frequency_title">Frequency</string>
+    <string name="settings_frequency_description">Adjust update\'s frequency</string>
+    <string name="settings_frequency_units"> ms</string>
+    <string name="settings_url_title">URL</string>
+    <string name="settings_url_description">Insert the url of the lamp</string>
+    <string name="url_not_valid">The inserted url is not valid</string>
+
+    <string name="main_color_seekbar_title">Color brightness</string>
+    <string name="main_seekbar_title">Brightness</string>
+    <string name="main_switch_title">Enable Rainbows</string>
+
 </resources>

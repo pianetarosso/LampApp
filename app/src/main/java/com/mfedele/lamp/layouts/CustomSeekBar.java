@@ -79,6 +79,7 @@ public class CustomSeekBar extends LinearLayout implements SeekBar.OnSeekBarChan
      * @param context Context
      */
     private void getAttributes(Context context, AttributeSet attrs) {
+
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.CustomSeekBar,
@@ -88,15 +89,15 @@ public class CustomSeekBar extends LinearLayout implements SeekBar.OnSeekBarChan
         titleTextView.setVisibility(GONE);
 
         try {
-            String title = a.getString(R.styleable.CustomSeekBar_csTitle);
+            String title = a.getString(R.styleable.CustomSeekBar_title);
 
             if (!TextUtils.isEmpty(title)) {
                 titleTextView.setVisibility(VISIBLE);
                 titleTextView.setText(title);
             }
 
-            setMaxValue(a.getInt(R.styleable.CustomSeekBar_csMaxValue, 100));
-            setMinValue(a.getInt(R.styleable.CustomSeekBar_csMinValue, 0));
+            setMaxValue(a.getInt(R.styleable.CustomSeekBar_android_max, 100));
+            setMinValue(a.getInt(R.styleable.CustomSeekBar_min, 0));
 
         } finally {
             a.recycle();
@@ -140,7 +141,7 @@ public class CustomSeekBar extends LinearLayout implements SeekBar.OnSeekBarChan
     }
 
     /**
-     * setting the MAX value for the seekBar
+     * Sets the MAX value for the seekBar
      *
      * @param value int
      */
@@ -156,7 +157,7 @@ public class CustomSeekBar extends LinearLayout implements SeekBar.OnSeekBarChan
     }
 
     /**
-     * Setting the MIN value for the seekBar
+     * Sets the MIN value for the seekBar
      *
      * @param value int
      */

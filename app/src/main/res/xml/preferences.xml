@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="@string/sp_network"
+        android:title="@string/settings_network_section">
+
+        <com.mfedele.lamp.layouts.UrlEditTextPreference
+            android:defaultValue="@string/url_default_value"
+            android:inputType="textWebEmailAddress"
+            android:key="@string/sp_url"
+            android:summary="@string/settings_url_description"
+            android:title="@string/settings_url_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/default_save_lamp_status_value"
+            android:key="@string/sp_enable_continuous_update"
+            android:summary="@string/settings_enable_continuous_update_description"
+            android:title="@string/settings_enable_continuous_update_title" />
+
+        <com.mfedele.lamp.layouts.SeekBarPreference
+            android:defaultValue="@integer/min_interval_ms"
+            android:dependency="@string/sp_enable_continuous_update"
+            android:key="@string/sp_update_frequency_ms"
+            android:max="@integer/max_interval_ms"
+            android:summary="@string/settings_frequency_description"
+            android:title="@string/settings_frequency_title"
+            custom:minVal="@integer/min_interval_ms"
+            custom:unitsRight="@string/settings_frequency_units" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="@string/sp_app"
+        android:title="@string/settings_app_section">
+
+        <CheckBoxPreference
+            android:key="@string/sp_save_lamp_values"
+            android:summary="@string/settings_save_lamp_status_description"
+            android:title="@string/settings_save_lamp_status_title" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

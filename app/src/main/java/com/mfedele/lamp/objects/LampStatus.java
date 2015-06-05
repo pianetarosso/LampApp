@@ -63,6 +63,11 @@ public class LampStatus {
         return colorBrightness == that.colorBrightness;
     }
 
+
+    protected LampStatus copy() {
+        return new LampStatus(getBrightness(), isColorEnabled(), getColor(), getColorBrightness());
+    }
+
     @Override
     public int hashCode() {
         int result = brightness;

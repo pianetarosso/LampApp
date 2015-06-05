@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <declare-styleable name="CustomColorPicker">
+        <attr name="color" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="CustomSeekBar">
-        <attr name="csTitle" format="string" />
-        <attr name="csMaxValue" format="integer" />
-        <attr name="csMinValue" format="integer" />
+        <attr name="title" format="string" />
+        <attr name="min" format="integer" />
+        <attr name="android:max" />
+    </declare-styleable>
+
+    <declare-styleable name="SeekBarPreference">
+        <attr name="android:max" />
+        <attr name="minVal" format="integer" />
+        <attr name="unitsLeft" format="string" />
+        <attr name="units" format="integer" />
+        <attr name="unitsRight" format="string" />
+        <attr name="interval" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="UrlEditTextPreference">
+        <attr name="android:inputType" />
     </declare-styleable>
 
 

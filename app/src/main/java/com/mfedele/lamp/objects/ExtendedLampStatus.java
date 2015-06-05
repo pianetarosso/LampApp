@@ -5,18 +5,20 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
+import com.mfedele.lamp.R;
+import com.mfedele.lamp.layouts.CustomColorPicker;
+import com.mfedele.lamp.layouts.CustomSeekBar;
+
 /**
  * Created by Marco Fedele on 04/06/15.
  */
-public class ExtendedLampStatus extends LampStatus {
+public class ExtendedLampStatus extends LampStatus implements
+        CustomSeekBar.OnSeekBarChangeListener,
+        CustomColorPicker.OnUserActionListener {
 
     private static final int DEFAULT_UPDATE_TIME = 200;
 
-    private static final String KEY_BRIGHTNESS = "brightness";
-    private static final String KEY_COLORS_ENABLED = "colors_enabled";
-    private static final String KEY_COLOR = "color";
-    private static final String KEY_COLOR_BRIGHTNESS = "color_brightness";
-
+    private SharedPreferences sp;
     private SharedPreferences.Editor editor;
 
     private OnStatusUpdate onStatusUpdate;
@@ -29,10 +31,16 @@ public class ExtendedLampStatus extends LampStatus {
     private Handler handler;
     private boolean running = false;
 
+    private Context context;
+
 
     public ExtendedLampStatus(Context context, OnStatusUpdate onStatusUpdate, int brightness, boolean isColorEnabled, int color, int colorBrightness) {
         super(brightness, isColorEnabled, color, colorBrightness);
-        editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+
+        this.context = context;
+
+        sp = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = sp.edit();
 
         this.onStatusUpdate = onStatusUpdate;
         handler = new Handler(context.getMainLooper());
@@ -45,10 +53,10 @@ public class ExtendedLampStatus extends LampStatus {
         return new ExtendedLampStatus(
                 context,
                 onStatusUpdate,
-                sp.getInt(KEY_BRIGHTNESS, 0),
-                sp.getBoolean(KEY_COLORS_ENABLED, false),
-                sp.getInt(KEY_COLOR, 0),
-                sp.getInt(KEY_COLOR_BRIGHTNESS, 0)
+                sp.getInt(context.getString(R.string.sp_brightness), context.getResources().getInteger(R.integer.def_brightness)),
+                sp.getBoolean(context.getString(R.string.sp_enable_color), context.getResources().getBoolean(R.bool.default_switch_value)),
+                sp.getInt(context.getString(R.string.sp_color), context.getResources().getColor(R.color.initial_color)),
+                sp.getInt(context.getString(R.string.sp_color_brightness), context.getResources().getInteger(R.integer.def_brightness))
         );
 
     }
@@ -62,6 +70,10 @@ public class ExtendedLampStatus extends LampStatus {
     @Override
     public void setIsColorEnabled(boolean isColorEnabled) {
         super.setIsColorEnabled(isColorEnabled);
+
+        if (saveEveryUpdate)
+            save();
+
         getData();
     }
 
@@ -77,14 +89,21 @@ public class ExtendedLampStatus extends LampStatus {
         getData();
     }
 
-    public void setColorAndBrightness(int color, int brightness) {
-        super.setColor(color);
-        super.setColorBrightness(brightness);
-        getData();
-    }
-
     public void setSaveEveryUpdate(boolean saveEveryUpdate) {
         this.saveEveryUpdate = saveEveryUpdate;
+
+        if (!saveEveryUpdate) {
+            editor.remove(context.getString(R.string.sp_brightness));
+            editor.remove(context.getString(R.string.sp_enable_color));
+            editor.remove(context.getString(R.string.sp_color));
+            editor.remove(context.getString(R.string.sp_color_brightness));
+            editor.commit();
+
+            setBrightness(context.getResources().getInteger(R.integer.def_brightness));
+            setIsColorEnabled(context.getResources().getBoolean(R.bool.default_switch_value));
+            setColor(context.getResources().getColor(R.color.initial_color));
+            setColorBrightness(context.getResources().getInteger(R.integer.def_brightness));
+        }
     }
 
     public void setInterval(int interval) {
@@ -102,7 +121,7 @@ public class ExtendedLampStatus extends LampStatus {
 
     private synchronized void getData() {
 
-        LampStatus l = new LampStatus(getBrightness(), isColorEnabled(), getColor(), getColorBrightness());
+        LampStatus l = copy();
 
         if (!updateContinuously) {
             notifyObserver(l);
@@ -119,14 +138,14 @@ public class ExtendedLampStatus extends LampStatus {
             @Override
             public void run() {
 
-                LampStatus l1 = new LampStatus(getBrightness(), isColorEnabled(), getColor(), getColorBrightness());
+                LampStatus l1 = copy();
 
                 if (running && (time == 0 || !l.equals(l1))) {
 
-                    if (updateContinuously)
-                        notifyObserver(l);
-
-                    start(l1, interval);
+                    if (updateContinuously) {
+                        notifyObserver(l1);
+                        start(l1, interval);
+                    }
                 } else {
                     running = false;
                 }
@@ -136,9 +155,6 @@ public class ExtendedLampStatus extends LampStatus {
 
     public void notifyObserver(LampStatus l) {
         if (onStatusUpdate != null) {
-            if (saveEveryUpdate)
-                save();
-
             onStatusUpdate.onDataUpdate(l);
         }
     }
@@ -149,15 +165,70 @@ public class ExtendedLampStatus extends LampStatus {
 
     private void save() {
 
-        editor.putInt(KEY_BRIGHTNESS, getBrightness());
-        editor.putBoolean(KEY_COLORS_ENABLED, isColorEnabled());
-        editor.putInt(KEY_COLOR, getColor());
-        editor.putInt(KEY_COLOR_BRIGHTNESS, getColorBrightness());
+        editor.putInt(context.getString(R.string.sp_brightness), getBrightness());
+        editor.putBoolean(context.getString(R.string.sp_enable_color), isColorEnabled());
+        editor.putInt(context.getString(R.string.sp_color), getColor());
+        editor.putInt(context.getString(R.string.sp_color_brightness), getColorBrightness());
         editor.commit();
     }
 
+    @Override
+    public void onColorChanged(int i) {
+        super.setColor(i);
+
+        if (updateContinuously)
+            getData();
+    }
+
+
+    // COLOR PICKER /////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onUserInteractionEnded(int color, int brightness) {
+        super.setColor(color);
+        super.setColorBrightness(brightness);
+
+        if (saveEveryUpdate)
+            save();
+
+        getData();
+    }
+
+    @Override
+    public void onBrightnessChanged(int value) {
+        super.setColorBrightness(value);
+
+        if (updateContinuously)
+            getData();
+    }
+
+    @Override
+    public void onProgressChanged(int value) {
+        super.setBrightness(value);
+
+        if (updateContinuously)
+            getData();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // BRIGHTNESS //////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onDragEnded(int value) {
+        super.setBrightness(value);
+
+        if (saveEveryUpdate)
+            save();
+
+        getData();
+    }
 
     public interface OnStatusUpdate {
         void onDataUpdate(LampStatus l);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 }

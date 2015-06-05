@@ -1,19 +1,22 @@
-package com.mfedele.lamp;
+package com.mfedele.lamp.fragments;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.graphics.Rect;
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import com.mfedele.lamp.R;
 import com.mfedele.lamp.layouts.CustomColorPicker;
 import com.mfedele.lamp.layouts.CustomSeekBar;
 import com.mfedele.lamp.objects.ExtendedLampStatus;
@@ -23,21 +26,18 @@ import com.mfedele.lamp.objects.ExtendedLampStatus;
  * A placeholder fragment containing a simple view.
  */
 public class MainFragment extends Fragment implements
-        CustomSeekBar.OnSeekBarChangeListener,
-        CustomColorPicker.OnUserActionListener,
         CompoundButton.OnCheckedChangeListener {
-
-
-    private static final boolean SAVE_LAMP_STATUS = true;
-    private static final boolean CONTINUOUSLY_UPDATE = false;
-    private static final int UPDATE_INTERVAL = 40;
 
 
     private CustomSeekBar brightnessSeekBar;
     private CustomColorPicker colorPicker;
     private Switch aSwitch;
 
+    private int colorPickerTransitionTime = 1;
+
     private ExtendedLampStatus lampStatus;
+
+    private SharedPreferences sharedPreferences;
 
     public MainFragment() {
     }
@@ -49,29 +49,42 @@ public class MainFragment extends Fragment implements
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
-    private void dispatchTouchevent(MotionEvent event, ViewGroup view) {
-        // Find the child view that was touched (perform a hit test)
-        Rect rect = new Rect();
-        int childCount = view.getChildCount();
-        int[] listViewCoords = new int[2];
-        view.getLocationOnScreen(listViewCoords);
-        int x = (int) event.getRawX() - listViewCoords[0];
-        int y = (int) event.getRawY() - listViewCoords[1];
-        View child;
-        for (int i = 0; i < childCount; i++) {
-            child = view.getChildAt(i);
-            child.getHitRect(rect);
-            if (rect.contains(x, y)) {
-                child.dispatchTouchEvent(event);
-                break;
-            }
-        }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
+    }
+
+    private void loadParams(Context context) {
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        lampStatus.setSaveEveryUpdate(
+                sp.getBoolean(
+                        context.getString(R.string.sp_save_lamp_values),
+                        context.getResources().getBoolean(R.bool.default_save_lamp_status_value)
+                )
+        );
+
+        lampStatus.setInterval(
+                sp.getInt(
+                        context.getString(R.string.sp_update_frequency_ms),
+                        context.getResources().getInteger(R.integer.min_interval_ms)
+                )
+        );
+
+        lampStatus.setUpdateContinuously(
+                sp.getBoolean(
+                        context.getString(R.string.sp_enable_continuous_update),
+                        context.getResources().getBoolean(R.bool.default_switch_value)
+                )
+        );
     }
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        colorPickerTransitionTime = getActivity().getResources().getInteger(R.integer.main_colorpicker_transition);
 
         brightnessSeekBar = (CustomSeekBar) view.findViewById(R.id.fragmentSeekBar);
 
@@ -80,9 +93,7 @@ public class MainFragment extends Fragment implements
         aSwitch = (Switch) view.findViewById(R.id.fragmentSwitch);
 
         lampStatus = ExtendedLampStatus.loadFromSp(getActivity(), (ExtendedLampStatus.OnStatusUpdate) getActivity());
-        lampStatus.setSaveEveryUpdate(SAVE_LAMP_STATUS);
-        lampStatus.setInterval(UPDATE_INTERVAL);
-        lampStatus.setUpdateContinuously(CONTINUOUSLY_UPDATE);
+        loadParams(getActivity());
 
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -93,10 +104,9 @@ public class MainFragment extends Fragment implements
                     brightnessSeekBar.setProgress(lampStatus.getBrightness());
                     colorPicker.setColor(lampStatus.getColor());
                     colorPicker.setBrightness(lampStatus.getColorBrightness());
+                    aSwitch.setChecked(lampStatus.isColorEnabled());
 
-                    if (lampStatus.isColorEnabled()) {
-                        aSwitch.setChecked(lampStatus.isColorEnabled());
-                    } else
+                    if (!lampStatus.isColorEnabled())
                         animateColorPicker(1, false);
 
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
@@ -112,51 +122,12 @@ public class MainFragment extends Fragment implements
     }
 
     private void enableListeners() {
-        brightnessSeekBar.setOnChangeListener(this);
-        colorPicker.setOnUserActionListenerListener(this);
+        brightnessSeekBar.setOnChangeListener(lampStatus);
+        colorPicker.setOnUserActionListenerListener(lampStatus);
         aSwitch.setOnCheckedChangeListener(this);
     }
 
 
-    // COLOR PICKER /////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onColorChanged(int i) {
-        if (CONTINUOUSLY_UPDATE)
-            lampStatus.setColor(i);
-    }
-
-    @Override
-    public void onUserInteractionEnded(int color, int brightness) {
-        if (!CONTINUOUSLY_UPDATE) {
-            lampStatus.setColorAndBrightness(color, brightness);
-        }
-    }
-
-    @Override
-    public void onBrightnessChanged(int value) {
-        if (CONTINUOUSLY_UPDATE)
-            lampStatus.setColorBrightness(value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    // BRIGHTNESS //////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onProgressChanged(int value) {
-        if (CONTINUOUSLY_UPDATE)
-            lampStatus.setBrightness(value);
-    }
-
-    @Override
-    public void onDragEnded(int value) {
-        if (!CONTINUOUSLY_UPDATE)
-            lampStatus.setBrightness(value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     // BUTTON //////////////////////////////////////////////////////////////////////////////////////
@@ -164,16 +135,11 @@ public class MainFragment extends Fragment implements
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         lampStatus.setIsColorEnabled(b);
-        animateColorPicker(1000, b);
+        animateColorPicker(colorPickerTransitionTime, b);
     }
 
 
     private void animateColorPicker(int time, boolean show) {
-
-        // disable controls to avoid problems during animation
-        brightnessSeekBar.setEnabled(false);
-        colorPicker.setEnabled(false);
-        aSwitch.setEnabled(false);
 
         // calculating transition
         float[] transition = {
@@ -188,6 +154,10 @@ public class MainFragment extends Fragment implements
             @Override
             public void onAnimationStart(Animator animator) {
 
+                // disable controls to avoid problems during animation
+                brightnessSeekBar.setEnabled(false);
+                colorPicker.setEnabled(false);
+                aSwitch.setEnabled(false);
             }
 
             @Override
@@ -216,7 +186,9 @@ public class MainFragment extends Fragment implements
         anim.start();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadParams(getActivity());
+    }
 }

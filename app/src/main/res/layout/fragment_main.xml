@@ -17,9 +17,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        custom:csMaxValue="100"
-        custom:csMinValue="0"
-        custom:csTitle="Brightness" />
+        android:max="@integer/max_brightness"
+        custom:color="@color/initial_color"
+        custom:min="@integer/min_brightness"
+        custom:title="@string/main_seekbar_title" />
 
     <Switch
         android:id="@+id/fragmentSwitch"
@@ -27,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/fragmentSeekBar"
         android:layout_centerHorizontal="true"
-        android:text="Enable Rainbows" />
+        android:text="@string/main_switch_title" />
 
     <com.mfedele.lamp.layouts.CustomColorPicker
         android:id="@+id/fragmentColorPicker"

@@ -1,6 +1,7 @@
 package com.mfedele.lamp.layouts;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
@@ -27,19 +28,14 @@ public class CustomColorPicker extends LinearLayout implements
     private boolean isInteractingWithBrightness = false;
 
 
-    public CustomColorPicker(Context context) {
-        super(context);
-        initialize(context);
-    }
-
     public CustomColorPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initialize(context);
+        initialize(context, attrs);
     }
 
     public CustomColorPicker(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initialize(context);
+        initialize(context, attrs);
     }
 
     /**
@@ -47,7 +43,7 @@ public class CustomColorPicker extends LinearLayout implements
      *
      * @param context Context
      */
-    private void initialize(Context context) {
+    private void initialize(Context context, AttributeSet attrs) {
 
         LayoutInflater.from(context).inflate(R.layout.custom_colorpicker, this, true);
 
@@ -56,6 +52,18 @@ public class CustomColorPicker extends LinearLayout implements
 
         picker = (ColorPicker) findViewById(R.id.colorPicker);
         picker.setShowOldCenterColor(false);
+
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.CustomColorPicker,
+                0, 0);
+
+        try {
+            int def = a.getColor(R.styleable.CustomColorPicker_color, context.getResources().getColor(R.color.initial_color));
+            picker.setColor(def);
+        } finally {
+            a.recycle();
+        }
 
         picker.setOnColorSelectedListener(this);
         picker.setOnColorChangedListener(this);

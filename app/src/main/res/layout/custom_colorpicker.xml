@@ -19,9 +19,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        custom:csMaxValue="100"
-        custom:csMinValue="0"
-        custom:csTitle="Color brightness" />
+        android:max="@integer/max_brightness"
+        custom:min="@integer/min_brightness"
+        custom:title="@string/main_color_seekbar_title" />
 
 
 </LinearLayout>
